@@ -4,12 +4,12 @@
 	xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>mil.disa.jsp</groupId>
-	<artifactId>fuse-demo</artifactId>
+	<groupId>mil.disa</groupId>
+	<artifactId>fuse-amq-dm-demo</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
-	<name>Fuse Camel Demo</name>
-	<description>Camel order processing with decision manager REST service</description>
+	<name>Fuse AMQ RHDM Demo</name>
+	<description>Camel order processing with decision manager REST service and AMQ topics and queues</description>
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
