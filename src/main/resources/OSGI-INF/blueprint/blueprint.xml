@@ -9,8 +9,8 @@
     governing permissions and limitations under the License. -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd              http://camel.apache.org/schema/blueprint http://camel.apache.org/schema/blueprint/camel-blueprint.xsd">
-    <camelContext id="mil-disa-demo"
-        xmlns="http://camel.apache.org/schema/blueprint" xmlns:order="http://mil.disa.demo/order">
+    <camelContext id="com-redhat-demo"
+        xmlns="http://camel.apache.org/schema/blueprint" xmlns:order="http://com.redhat.demo/order">
         <!-- route that consumes files from a directory -->
         <route id="FileRoute">
             <from id="_from1" uri="file:work/eip/input"/>

@@ -4,7 +4,7 @@
 	xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>mil.disa</groupId>
+	<groupId>com.redhat</groupId>
 	<artifactId>fuse-amq-dm-demo</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
@@ -82,8 +82,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-SymbolicName>disa-demo</Bundle-SymbolicName>
-						<Bundle-Name>DISA Demo</Bundle-Name>
+						<Bundle-SymbolicName>com.redhat.demo</Bundle-SymbolicName>
+						<Bundle-Name>RedHat Demo</Bundle-Name>
 					</instructions>
 				</configuration>
 			</plugin>
