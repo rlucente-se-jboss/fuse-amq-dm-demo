@@ -22,7 +22,7 @@
 		required to assign id's to the <camelContext/> and <route/> elements, it 
 		is a good idea to set them for runtime management purposes (logging, JMX 
 		MBeans, ...) -->
-	<camelContext id="mil-disa-jsp-demo"
+	<camelContext id="mil-disa-demo"
 		xmlns="http://camel.apache.org/schema/blueprint"
 		xmlns:order="http://org.jboss.fuse.quickstarts/examples/order/v7">
 		<!-- This is the main Camel route. In Camel, you can split up routes into 

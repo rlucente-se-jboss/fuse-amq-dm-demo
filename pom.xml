@@ -82,8 +82,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-SymbolicName>dm-example</Bundle-SymbolicName>
-						<Bundle-Name>DISA JSP Demo</Bundle-Name>
+						<Bundle-SymbolicName>disa-demo</Bundle-SymbolicName>
+						<Bundle-Name>DISA Demo</Bundle-Name>
 					</instructions>
 				</configuration>
 			</plugin>
