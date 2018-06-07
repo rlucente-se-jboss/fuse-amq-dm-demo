@@ -16,17 +16,16 @@
             <from id="_from1" uri="file:work/eip/input"/>
             <log id="_log1" message="[file]    Processing ${file:name}"/>
             <wireTap id="_wireTap1" uri="direct:wiretap"/>
-            <to id="_to1" uri="direct:mainProcessing"/>
             <to id="_to2" uri="direct:splitter"/>
             <log id="_log2" message="[main]    Done processing ${file:name}"/>
         </route>
-        <!-- Archives each file order received -->
+        <!-- route that archives each file order received -->
         <route id="wiretapRoute">
             <from id="_from2" uri="direct:wiretap"/>
             <log id="_log3" message="[wiretap]  Archiving ${file:name}"/>
             <to id="_to3" uri="file:work/eip/archive"/>
         </route>
-        <!-- Split multiple orders in a message then process each one -->
+        <!-- route that splits multiple orders in a message then processes each one -->
         <route id="splitterRoute">
             <from id="_from3" uri="direct:splitter"/>
             <split id="_split1">
@@ -34,35 +33,31 @@
                 <xpath>//order:order</xpath>
                 <!-- Preserve the original order message before setting up 
                     call to RHDM KIE server -->
-                <!-- transform message body to request format for RHDM KIE 
-                    server -->
                 <setProperty id="_setProperty1" propertyName="origInBody">
                     <simple>${in.body}</simple>
                 </setProperty>
-                <!-- add required headers for REST call to RHDM KIE server -->
+                <!-- transform in:body to input required for RHDM KIE server -->
                 <to id="_to4" uri="xslt:kieserver-request.xsl"/>
+                <!-- add required headers for REST call to RHDM KIE server -->
                 <setHeader headerName="Content-Type" id="_setHeader1">
                     <constant>application/xml</constant>
                 </setHeader>
                 <setHeader headerName="X-KIE-ContentType" id="_setHeader2">
                     <constant>xstream</constant>
                 </setHeader>
-                <!-- determine geographic region using RHDM KIE server REST 
-                    service -->
                 <setHeader headerName="Accept" id="_setHeader3">
                     <constant>application/xml</constant>
                 </setHeader>
                 <!-- set region based on REST API call -->
                 <inOut id="_inOut1" uri="http4://localhost:8080/kie-server/services/rest/server/containers/instances/demo_1.0.0?authMethod=BASIC&amp;authUsername=dmUser&amp;authPassword=admin1jboss!"/>
-                <!-- restore original message body -->
                 <setHeader headerName="region" id="_setHeader4">
                     <xpath resultType="java.lang.String">//region</xpath>
                 </setHeader>
-                <!-- set order id header based on order content -->
+                <!-- restore original message body -->
                 <setBody id="_setBody1">
                     <simple>${in.header.origInBody}</simple>
                 </setBody>
-                <!-- log using the extra headers we just added to the message -->
+                <!-- set order id header based on order content -->
                 <setHeader headerName="orderId" id="_setHeader5">
                     <xpath resultType="java.lang.String">/order:order/@id</xpath>
                 </setHeader>
@@ -74,7 +69,7 @@
                 </recipientList>
             </split>
         </route>
-        <!-- Uses filter to determine if order requires special processing 
+        <!-- this route uses filter to determine if order requires special processing 
             but currently just logs -->
         <route id="filterRoute">
             <from id="_from4" uri="direct:filter"/>
