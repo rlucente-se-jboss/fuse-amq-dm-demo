@@ -16,7 +16,7 @@
      permissions and limitations under the License.
 
 -->
-<orders xmlns="http://org.jboss.fuse.quickstarts/examples/order/v7">
+<orders xmlns="http://mil.disa.demo/order"
     <order id="2017_0001">
 
         <customer id="A0001">
