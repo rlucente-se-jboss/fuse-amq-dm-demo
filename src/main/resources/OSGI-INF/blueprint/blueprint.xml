@@ -8,89 +8,79 @@
     KIND, either express or implied. See the License for the specific language 
     governing permissions and limitations under the License. -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd              http://camel.apache.org/schema/blueprint http://camel.apache.org/schema/blueprint/camel-blueprint.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd              http://camel.apache.org/schema/blueprint http://camel.apache.org/schema/blueprint/camel-blueprint.xsd">
     <camelContext id="mil-disa-demo"
-        xmlns="http://camel.apache.org/schema/blueprint"
-        xmlns:order="http://mil.disa.demo/order">
-
+        xmlns="http://camel.apache.org/schema/blueprint" xmlns:order="http://mil.disa.demo/order">
         <!-- route that consumes files from a directory -->
         <route id="FileRoute">
-            <from uri="file:work/eip/input" />
-            <log message="[file]    Processing ${file:name}" />
-            <wireTap uri="direct:wiretap" />
-            <to uri="direct:mainProcessing" />
-            <to uri="direct:splitter" />
-            <log message="[main]    Done processing ${file:name}" />
+            <from id="_from1" uri="file:work/eip/input"/>
+            <log id="_log1" message="[file]    Processing ${file:name}"/>
+            <wireTap id="_wireTap1" uri="direct:wiretap"/>
+            <to id="_to1" uri="direct:mainProcessing"/>
+            <to id="_to2" uri="direct:splitter"/>
+            <log id="_log2" message="[main]    Done processing ${file:name}"/>
         </route>
-
         <!-- Archives each file order received -->
         <route id="wiretapRoute">
-            <from uri="direct:wiretap" />
-            <log message="[wiretap]  Archiving ${file:name}" />
-            <to uri="file:work/eip/archive" />
+            <from id="_from2" uri="direct:wiretap"/>
+            <log id="_log3" message="[wiretap]  Archiving ${file:name}"/>
+            <to id="_to3" uri="file:work/eip/archive"/>
         </route>
-
         <!-- Split multiple orders in a message then process each one -->
         <route id="splitterRoute">
-            <from uri="direct:splitter" />
-            <split>
+            <from id="_from3" uri="direct:splitter"/>
+            <split id="_split1">
                 <!-- use xpath to split the orders -->
                 <xpath>//order:order</xpath>
                 <!-- Preserve the original order message before setting up 
                     call to RHDM KIE server -->
-                <setProperty id="_setProperty1"
-                    propertyName="origInBody">
-                    <simple>${in.body}</simple>
-                </setProperty>
                 <!-- transform message body to request format for RHDM KIE 
                     server -->
-                <to uri="xslt:kieserver-request.xsl" />
+                <setProperty id="_setProperty1" propertyName="origInBody">
+                    <simple>${in.body}</simple>
+                </setProperty>
                 <!-- add required headers for REST call to RHDM KIE server -->
-                <setHeader headerName="Content-Type">
+                <to id="_to4" uri="xslt:kieserver-request.xsl"/>
+                <setHeader headerName="Content-Type" id="_setHeader1">
                     <constant>application/xml</constant>
                 </setHeader>
-                <setHeader headerName="X-KIE-ContentType">
+                <setHeader headerName="X-KIE-ContentType" id="_setHeader2">
                     <constant>xstream</constant>
-                </setHeader>
-                <setHeader headerName="Accept">
-                    <constant>application/xml</constant>
                 </setHeader>
                 <!-- determine geographic region using RHDM KIE server REST 
                     service -->
-                <inOut
-                    uri="http4://localhost:8080/kie-server/services/rest/server/containers/instances/demo_1.0.0?authMethod=BASIC&amp;authUsername=dmUser&amp;authPassword=admin1jboss!" />
+                <setHeader headerName="Accept" id="_setHeader3">
+                    <constant>application/xml</constant>
+                </setHeader>
                 <!-- set region based on REST API call -->
-                <setHeader headerName="region">
+                <inOut id="_inOut1" uri="http4://localhost:8080/kie-server/services/rest/server/containers/instances/demo_1.0.0?authMethod=BASIC&amp;authUsername=dmUser&amp;authPassword=admin1jboss!"/>
+                <!-- restore original message body -->
+                <setHeader headerName="region" id="_setHeader4">
                     <xpath resultType="java.lang.String">//region</xpath>
                 </setHeader>
-                <!-- restore original message body -->
-                <setBody>
+                <!-- set order id header based on order content -->
+                <setBody id="_setBody1">
                     <simple>${in.header.origInBody}</simple>
                 </setBody>
-                <!-- set order id header based on order content -->
-                <setHeader headerName="orderId">
+                <!-- log using the extra headers we just added to the message -->
+                <setHeader headerName="orderId" id="_setHeader5">
                     <xpath resultType="java.lang.String">/order:order/@id</xpath>
                 </setHeader>
-                <!-- log using the extra headers we just added to the message -->
-                <log
-                    message="[splitter] Shipping order ${header.orderId} to region ${header.region}" />
                 <!-- use recipient list to dynamically generate endpoint 
                     and send message to multiple destinations -->
-                <recipientList>
+                <log id="_log4" message="[splitter] Shipping order ${header.orderId} to region ${header.region}"/>
+                <recipientList id="_recipientList1">
                     <simple>file:work/eip/output/${header.region}?fileName=${header.orderId}.xml,direct:filter</simple>
                 </recipientList>
             </split>
         </route>
-
         <!-- Uses filter to determine if order requires special processing 
             but currently just logs -->
         <route id="filterRoute">
-            <from uri="direct:filter" />
-            <filter>
+            <from id="_from4" uri="direct:filter"/>
+            <filter id="_filter1">
                 <xpath resultType="java.lang.String">sum(//order:quantity/text()) &gt; 100</xpath>
-                <log
-                    message="[filter]   Order ${header.orderId} is an order for more than 100 animals" />
+                <log id="_log5" message="[filter]   Order ${header.orderId} is an order for more than 100 animals"/>
             </filter>
         </route>
     </camelContext>
