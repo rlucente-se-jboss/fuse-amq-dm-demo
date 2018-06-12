@@ -49,14 +49,19 @@
                     <constant>application/xml</constant>
                 </setHeader>
                 <!-- call RHDM via REST API -->
-                <inOut id="_inOut1" uri="http4://localhost:8080/kie-server/services/rest/server/containers/instances/demo_1.0.0?authMethod=BASIC&amp;authUsername=dmUser&amp;authPassword=admin1jboss!"/>
+                <to id="_inOut1" uri="http4://localhost:8080/kie-server/services/rest/server/containers/instances/demo_1.0.0?authMethod=BASIC&amp;authUsername=dmUser&amp;authPassword=admin1jboss!"/>
+                <convertBodyTo type="java.lang.String" />
                 <!-- set region based on REST API call -->
                 <setHeader headerName="region" id="_setHeader4">
                     <xpath resultType="java.lang.String">//region</xpath>
                 </setHeader>
+                <!-- set special handling based on REST API call -->
+                <setHeader headerName="isSpecial">
+                    <xpath resultType="java.lang.Boolean">//isSpecial</xpath>
+                </setHeader>
                 <!-- restore original message body -->
                 <setBody id="_setBody1">
-                    <simple>${in.header.origInBody}</simple>
+                    <simple>${exchangeProperty.origInBody}</simple>
                 </setBody>
                 <!-- set order id header based on order content -->
                 <setHeader headerName="orderId" id="_setHeader5">
@@ -70,13 +75,12 @@
                 </recipientList>
             </split>
         </route>
-        <!-- this route uses filter to determine if order requires special processing 
-            but currently just logs -->
+        <!-- this route uses filter to provide special processing for large orders but currently just logs -->
         <route id="filterRoute">
-            <from id="_from4" uri="direct:filter"/>
+            <from uri="direct:filter" />
             <filter id="_filter1">
-                <xpath resultType="java.lang.String">sum(//order:quantity/text()) &gt; 100</xpath>
-                <log id="_log5" message="[filter]   Order ${header.orderId} is an order for more than 100 animals"/>
+                <simple>${header.isSpecial}</simple>
+                <log id="_log5" message="[filter]   Order ${header.orderId} is a larger order requiring special handling." />
             </filter>
         </route>
     </camelContext>
