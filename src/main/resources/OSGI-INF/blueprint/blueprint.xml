@@ -48,8 +48,9 @@
                 <setHeader headerName="Accept" id="_setHeader3">
                     <constant>application/xml</constant>
                 </setHeader>
-                <!-- set region based on REST API call -->
+                <!-- call RHDM via REST API -->
                 <inOut id="_inOut1" uri="http4://localhost:8080/kie-server/services/rest/server/containers/instances/demo_1.0.0?authMethod=BASIC&amp;authUsername=dmUser&amp;authPassword=admin1jboss!"/>
+                <!-- set region based on REST API call -->
                 <setHeader headerName="region" id="_setHeader4">
                     <xpath resultType="java.lang.String">//region</xpath>
                 </setHeader>
