@@ -6,16 +6,17 @@
     <xsl:output omit-xml-declaration="yes" indent="no" />
     <xsl:template match="/order:order">
         <batch-execution>
-            <insert out-identifier="CountryWithRegion"
-                return-object="true" entry-point="DEFAULT">
+            <insert out-identifier="CountryWithRegion" return-object="true" entry-point="DEFAULT">
+                <com.redhat.rhdm.demo.Customer>
+                    <id><xsl:value-of select="order:customer/@id" /></id>
+                    <city><xsl:value-of select="order:customer/order:city" /></city>
+                    <countryCode><xsl:value-of select="order:customer/order:country" /></countryCode>
+                </com.redhat.rhdm.demo.Customer>
+            </insert>
+            <insert out-identifier="OrderWithHandling" return-object="true" entry-point="DEFAULT">
                 <com.redhat.rhdm.demo.Order>
                     <id><xsl:value-of select="@id" /></id>
-                    <customer>
-                        <id><xsl:value-of select="order:customer/@id" /></id>
-                        <city><xsl:value-of select="order:customer/order:city" /></city>
-                        <countryCode><xsl:value-of select="order:customer/order:country" /></countryCode>
-                    </customer> 
-                    <date><xsl:value-of select="order:date" /></date>
+                    <date><xsl:value-of select="order:date" /><xsl:text>T00:00:00Z</xsl:text></date>
                     <orderlines>
                         <xsl:apply-templates select="order:orderlines/order:orderline" />
                     </orderlines>
