@@ -13,46 +13,57 @@
         xmlns="http://camel.apache.org/schema/blueprint" xmlns:order="http://com.redhat.demo/order">
         <!-- route that consumes files from a directory -->
         <route id="FileRoute">
-            <from id="_from1" uri="file:work/eip/input"/>
-            <log id="_log1" message="[file]    Processing ${file:name}"/>
-            <wireTap id="_wireTap1" uri="direct:wiretap"/>
-            <to id="_to2" uri="direct:splitter"/>
-            <log id="_log2" message="[main]    Done processing ${file:name}"/>
+            <from uri="file:work/eip/input"/>
+            <log message="[file]    Processing ${file:name}"/>
+            <wireTap uri="direct:wiretap"/>
+            <to uri="direct:splitter"/>
+            <log message="[main]    Done processing ${file:name}"/>
+        </route>
+        <!-- route that consumes messages from a JMS queue -->
+        <route id="QueueRoute">
+            <from uri="activemq:queue:orderQueue"/>
+            <log message="[queue]    Processing queue message"/>
+            <to uri="direct:splitter"/>
+        </route>
+        <!-- route that consumes messages from a JMS topic -->
+        <route id="TopicRoute">
+            <from uri="activemq:topic:orderTopic"/>
+            <log message="[topic]    Processing topic message"/>
+            <to uri="direct:splitter"/>
         </route>
         <!-- route that archives each file order received -->
         <route id="wiretapRoute">
-            <from id="_from2" uri="direct:wiretap"/>
-            <log id="_log3" message="[wiretap]  Archiving ${file:name}"/>
-            <to id="_to3" uri="file:work/eip/archive"/>
+            <from uri="direct:wiretap"/>
+            <log message="[wiretap]  Archiving ${file:name}"/>
+            <to uri="file:work/eip/archive"/>
         </route>
         <!-- route that splits multiple orders in a message then processes each one -->
         <route id="splitterRoute">
-            <from id="_from3" uri="direct:splitter"/>
-            <split id="_split1">
+            <from uri="direct:splitter"/>
+            <split>
                 <!-- use xpath to split the orders -->
                 <xpath>//order:order</xpath>
-                <!-- Preserve the original order message before setting up 
-                    call to RHDM KIE server -->
-                <setProperty id="_setProperty1" propertyName="origInBody">
+                <!-- Preserve the original order message before setting up call to RHDM KIE server -->
+                <setProperty propertyName="origInBody">
                     <simple>${in.body}</simple>
                 </setProperty>
                 <!-- transform in:body to input required for RHDM KIE server -->
-                <to id="_to4" uri="xslt:kieserver-request.xsl"/>
+                <to uri="xslt:kieserver-request.xsl"/>
                 <!-- add required headers for REST call to RHDM KIE server -->
-                <setHeader headerName="Content-Type" id="_setHeader1">
+                <setHeader headerName="Content-Type">
                     <constant>application/xml</constant>
                 </setHeader>
-                <setHeader headerName="X-KIE-ContentType" id="_setHeader2">
+                <setHeader headerName="X-KIE-ContentType">
                     <constant>xstream</constant>
                 </setHeader>
-                <setHeader headerName="Accept" id="_setHeader3">
+                <setHeader headerName="Accept">
                     <constant>application/xml</constant>
                 </setHeader>
                 <!-- call RHDM via REST API -->
-                <to id="_inOut1" uri="http4://localhost:8080/kie-server/services/rest/server/containers/instances/demo_1.0.0?authMethod=BASIC&amp;authUsername=dmUser&amp;authPassword=admin1jboss!"/>
-                <convertBodyTo type="java.lang.String" />
-                <!-- set region based on REST API call -->
-                <setHeader headerName="region" id="_setHeader4">
+                <to uri="http4://localhost:8080/kie-server/services/rest/server/containers/instances/demo_1.0.0?authMethod=BASIC&amp;authUsername=dmUser&amp;authPassword=admin1jboss!"/>
+                <convertBodyTo type="java.lang.String"/>
+                <!-- set geographic region based on REST API call -->
+                <setHeader headerName="region"> 
                     <xpath resultType="java.lang.String">//region</xpath>
                 </setHeader>
                 <!-- set special handling based on REST API call -->
@@ -60,27 +71,26 @@
                     <xpath resultType="java.lang.Boolean">//isSpecial</xpath>
                 </setHeader>
                 <!-- restore original message body -->
-                <setBody id="_setBody1">
+                <setBody>
                     <simple>${exchangeProperty.origInBody}</simple>
                 </setBody>
                 <!-- set order id header based on order content -->
-                <setHeader headerName="orderId" id="_setHeader5">
+                <setHeader headerName="orderId">
                     <xpath resultType="java.lang.String">/order:order/@id</xpath>
                 </setHeader>
-                <!-- use recipient list to dynamically generate endpoint 
-                    and send message to multiple destinations -->
-                <log id="_log4" message="[splitter] Shipping order ${header.orderId} to region ${header.region}"/>
-                <recipientList id="_recipientList1">
+                <log message="[splitter] Shipping order ${header.orderId} to region ${header.region}"/>
+                <!-- use recipient list to dynamically generate endpoint and send message to multiple destinations -->
+                <recipientList>
                     <simple>file:work/eip/output/${header.region}?fileName=${header.orderId}.xml,direct:filter</simple>
                 </recipientList>
             </split>
         </route>
         <!-- this route uses filter to provide special processing for large orders but currently just logs -->
         <route id="filterRoute">
-            <from uri="direct:filter" />
-            <filter id="_filter1">
+            <from uri="direct:filter"/>
+            <filter>
                 <simple>${header.isSpecial}</simple>
-                <log id="_log5" message="[filter]   Order ${header.orderId} is a larger order requiring special handling." />
+                <log message="[filter]   Order ${header.orderId} is a larger order requiring special handling."/>
             </filter>
         </route>
     </camelContext>
