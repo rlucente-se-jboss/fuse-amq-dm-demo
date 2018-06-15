@@ -22,13 +22,13 @@
         <!-- route that consumes messages from a JMS queue -->
         <route id="QueueRoute">
             <from id="fromQueue" uri="activemq:queue:orderQueue"/>
-            <log id="logQueueBody" message="[queue]    Processing queue message ${body}"/>
+            <log id="logQueueBody" message="[queue]    Processing queue message"/>
             <to id="toSplitterFromQueue" uri="direct:splitter"/>
         </route>
         <!-- route that consumes messages from a JMS topic -->
         <route id="TopicRoute">
             <from id="fromTopic" uri="activemq:topic:orderTopic"/>
-            <log id="logTopicBody" message="[topic]    Processing topic message ${body}"/>
+            <log id="logTopicBody" message="[topic]    Processing topic message"/>
             <to id="toSplitterFromTopic" uri="direct:splitter"/>
         </route>
         <!-- route that archives each file order received -->
